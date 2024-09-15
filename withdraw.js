@@ -40,8 +40,24 @@ module.exports.handleText = async (ctx, text) => {
         }
 
         // Check if the user has enough balance
-        if (user.balance < amount) {
-          ctx.reply("Insufficient balance.");
+        const maxWithdrawalAmount = Math.min(
+          user.balance * 0.2,
+          user.balance - 0.9
+        ); // 20% of balance, but not less than 0.9 USDT
+        if (amount > maxWithdrawalAmount) {
+          ctx.reply(
+            `You can only withdraw up to ${maxWithdrawalAmount} USDT every 24 hours.`
+          );
+          return;
+        }
+
+        // Check if the user has withdrawn in the last 24 hours
+        const lastWithdrawal = await Withdrawal.findOne({
+          userId: user.userId,
+          createdAt: { $gt: Date.now() - 24 * 60 * 60 * 1000 },
+        });
+        if (lastWithdrawal) {
+          ctx.reply("You can only withdraw once every 24 hours.");
           return;
         }
 

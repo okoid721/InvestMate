@@ -1,6 +1,6 @@
 // investHandler.js
 const fs = require("fs");
-const { Investment } = require("./db"); // Import the Investment model
+const { User, Investment } = require("./db"); // Import the Investment model
 
 module.exports = {
   handleInvest: async (ctx) => {
@@ -31,7 +31,15 @@ module.exports = {
   handleText: async (ctx, text) => {
     if (["3 USDT", "5 USDT", "8 USDT", "10 USDT", "20 USDT"].includes(text)) {
       const amount = parseInt(text.split(" ")[0]);
+      const profitPercentage = 0.75; // 175% profit
 
+      // Calculate the profit amount
+      const profitAmount = amount * profitPercentage;
+
+      // Update the user's balance
+      const user = await User.findOne({ userId: ctx.from.id });
+      user.balance += amount + profitAmount;
+      await user.save();
       ctx.replyWithPhoto(
         {
           source: fs.createReadStream("./card.PNG"),
@@ -79,6 +87,21 @@ module.exports = {
         ],
       ];
       ctx.reply("Transfer successful", {
+        reply_markup: {
+          keyboard: keyboard,
+          one_time_keyboard: true,
+          resize_keyboard: true,
+        },
+      });
+    } else if (text === "Back") {
+      const keyboard = [
+        [
+          { text: "Balance", callback_data: "balance" },
+          { text: "Invest", callback_data: "invest" },
+          { text: "Withdraw", callback_data: "withdraw" },
+        ],
+      ];
+      ctx.reply("Failed", {
         reply_markup: {
           keyboard: keyboard,
           one_time_keyboard: true,
