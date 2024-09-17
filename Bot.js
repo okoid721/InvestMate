@@ -1,7 +1,10 @@
 const { Telegraf } = require("telegraf");
-const { connectToDatabase, User } = require("./db");
+const express = require("express");
+const mongoose = require("mongoose");
 const fs = require("fs");
 require("dotenv").config();
+
+const { connectToDatabase, User, Investment, Withdrawal } = require("./db");
 const investHandler = require("./investHandler");
 const withdrawHandler = require("./withdraw");
 const balanceHandler = require("./balance");
@@ -9,10 +12,61 @@ const balanceHandler = require("./balance");
 // Initialize and connect to the database
 connectToDatabase();
 
+// Initialize Express.js
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware to parse JSON
+app.use(express.json());
+
+// Express.js routes
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/investments", async (req, res) => {
+  try {
+    const investments = await Investment.find({});
+    res.json(investments);
+  } catch (error) {
+    console.error("Error fetching investments:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/withdrawals", async (req, res) => {
+  try {
+    const withdrawals = await Withdrawal.find({});
+    res.json(withdrawals);
+  } catch (error) {
+    console.error("Error fetching withdrawals:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.delete("/api/withdrawals/:id", async (req, res) => {
+  try {
+    const result = await Withdrawal.deleteOne({ _id: req.params.id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Withdrawal not found" });
+    }
+    res.status(200).json({ message: "Withdrawal deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting withdrawal:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Initialize the Telegraf bot
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const bot = new Telegraf(BOT_TOKEN);
 
-module.exports = bot;
 // Handle /start command
 bot.start(async (ctx) => {
   const { id, first_name, last_name, username } = ctx.from;
@@ -73,5 +127,14 @@ bot.on("text", async (ctx) => {
   }
 });
 
-// Launch the bot
-bot.launch();
+// Launch both Express and Telegraf
+async function startApp() {
+  await Promise.all([
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    }),
+    bot.launch(),
+  ]);
+}
+
+startApp().catch((error) => console.error("Error starting app:", error));
