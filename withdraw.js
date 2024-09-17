@@ -27,7 +27,7 @@ module.exports.handleText = async (ctx, text) => {
   } else if (waitingForAmount[ctx.from.id] === true) {
     const amount = parseFloat(text);
 
-    if (isNaN(amount) || amount < 2) {
+    if (isNaN(amount) || amount < 0.7) {
       ctx.reply("The withdrawable amount should be more than 2 USDT.");
     } else {
       try {

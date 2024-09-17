@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 // MongoDB connection URI
-const MONGO_URI =
-  "mongodb+srv://okoid721:NJcGvESFVzdiaMJp@cluster0.ur3pl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = process.env.MONGO_URI;
 
 // Define a schema for storing user data
 const userSchema = new mongoose.Schema({

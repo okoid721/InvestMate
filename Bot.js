@@ -1,6 +1,7 @@
 const { Telegraf } = require("telegraf");
 const { connectToDatabase, User } = require("./db");
 const fs = require("fs");
+require("dotenv").config();
 const investHandler = require("./investHandler");
 const withdrawHandler = require("./withdraw");
 const balanceHandler = require("./balance");
@@ -8,7 +9,7 @@ const balanceHandler = require("./balance");
 // Initialize and connect to the database
 connectToDatabase();
 
-const BOT_TOKEN = "7418377962:AAFtkwxfM241PKTHDk_rgZ7Ybbl2fTdC1S0";
+const BOT_TOKEN = process.env.BOT_TOKEN;
 const bot = new Telegraf(BOT_TOKEN);
 
 module.exports = bot;
@@ -34,7 +35,7 @@ bot.start(async (ctx) => {
         "\n" +
         "Remember: InvestMate is a place where you can invest your cryptocurrency and earn 20% every day, offering boundless investment opportunities!.🚀\n" +
         "\n" +
-        "💬 *Join our Telegram group for updates and discussions:* [Join the Group](https://t.me/+5_Xo72pZBJYxMTFk)",
+        "💬 *Join our Telegram group for updates and discussions:* [Join the Group](https://t.me/+2TGeHpWQ4_JhMzZk)",
       parse_mode: "Markdown",
       reply_markup: {
         keyboard: [
