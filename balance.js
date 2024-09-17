@@ -1,6 +1,5 @@
 const { User, Investment } = require("./db");
 // const schedule = require("node-schedule");
-const bot = require("./bot"); // Assuming you have a bot instance for sending messages
 
 // Function to update user balances based on investments
 // async function updateBalances() {
