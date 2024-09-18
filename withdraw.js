@@ -1,94 +1,66 @@
+const { User } = require("./db"); // Assuming User model is used to store wallet addresses
 const waitingForWalletAddress = {};
-const waitingForAmount = {};
-const fs = require("fs");
-const { User, Withdrawal } = require("./db"); // Import Withdrawal model
 
-module.exports.handleWithdraw = async (ctx) => {
-  waitingForWalletAddress[ctx.from.id] = true;
-  ctx.replyWithPhoto(
-    {
-      source: fs.createReadStream("./card.PNG"),
-    },
-    {
-      caption:
-        "⬇️ Now Please Submit Your USDT(BNB) Wallet Address \n " +
-        "\n" +
-        "Search USDT(BNB) in wallet or Safepal, Copy receive address and paste it Here",
+module.exports.handleSetWallet = async (ctx) => {
+  const userId = ctx.from.id;
+
+  try {
+    // Retrieve user information from the database
+    const user = await User.findOne({ userId });
+
+    if (!user) {
+      ctx.reply("User not found.");
+      return;
     }
-  );
+
+    // Check if the user already has a wallet address set
+    if (user.wallet) {
+      ctx.reply(
+        "Your wallet address has already been set and cannot be changed."
+      );
+      return;
+    }
+
+    // Prompt the user to submit their wallet address
+    waitingForWalletAddress[userId] = true;
+    ctx.reply(
+      "Please submit your USDT(BNB) wallet address and 20% of your balance will be withdrawed:"
+    );
+  } catch (error) {
+    console.error("Error checking user wallet:", error);
+    ctx.reply("An error occurred. Please try again later.");
+  }
 };
 
 module.exports.handleText = async (ctx, text) => {
-  if (waitingForWalletAddress[ctx.from.id] === true) {
-    // Save the wallet address and prompt for amount
-    waitingForWalletAddress[ctx.from.id] = text; // Save the wallet address
-    waitingForAmount[ctx.from.id] = true; // Set waitingForAmount to true
-    ctx.reply("Please enter the amount (e.g., 2 USDT).");
-  } else if (waitingForAmount[ctx.from.id] === true) {
-    const amount = parseFloat(text);
+  const userId = ctx.from.id;
 
-    if (isNaN(amount) || amount < 0.7) {
-      ctx.reply("The withdrawable amount should be more than 2 USDT.");
-    } else {
-      try {
-        // Retrieve user information from the database
-        const user = await User.findOne({ userId: ctx.from.id });
+  if (waitingForWalletAddress[userId] === true) {
+    const walletAddress = text; // Assuming text contains the wallet address
 
-        if (!user) {
-          ctx.reply("User not found.");
-          return;
-        }
+    try {
+      // Retrieve user information from the database
+      const user = await User.findOne({ userId });
 
-        // Check if the user has enough balance
-        const maxWithdrawalAmount = Math.min(
-          user.balance * 0.2,
-          user.balance - 0.9
-        ); // 20% of balance, but not less than 0.9 USDT
-        if (amount > maxWithdrawalAmount) {
-          ctx.reply(
-            `You can only withdraw up to ${maxWithdrawalAmount} USDT every 24 hours.`
-          );
-          return;
-        }
-
-        // Check if the user has withdrawn in the last 24 hours
-        const lastWithdrawal = await Withdrawal.findOne({
-          userId: user.userId,
-          createdAt: { $gt: Date.now() - 24 * 60 * 60 * 1000 },
-        });
-        if (lastWithdrawal) {
-          ctx.reply("You can only withdraw once every 24 hours.");
-          return;
-        }
-
-        // Deduct the amount from user's balance
-        user.balance -= amount;
-        await user.save();
-
-        // Log the withdrawal
-        const withdrawal = new Withdrawal({
-          userId: user.userId,
-          wallet: waitingForWalletAddress[ctx.from.id], // Store the wallet address
-          withdrawnAmount: amount,
-          updatedBalance: user.balance,
-        });
-        await withdrawal.save();
-
-        // Reply with confirmation messages
-        ctx.reply(
-          `Withdrawal processed to wallet address: ${
-            waitingForWalletAddress[ctx.from.id]
-          }`
-        );
-        ctx.reply("Successfully withdrawn!");
-
-        // Reset the waiting flags after the withdrawal is completed
-        delete waitingForWalletAddress[ctx.from.id];
-        delete waitingForAmount[ctx.from.id];
-      } catch (error) {
-        console.error("Error processing withdrawal:", error);
-        ctx.reply("An error occurred while processing your withdrawal.");
+      if (!user) {
+        ctx.reply("User not found.");
+        return;
       }
+
+      // Save the wallet address if it's not already set
+      if (!user.wallet) {
+        user.wallet = walletAddress;
+        await user.save();
+        ctx.reply("Wallet uploaded successfully!");
+      } else {
+        ctx.reply("Your wallet address is already set and cannot be changed.");
+      }
+
+      // Clear the waiting flag after wallet is set
+      delete waitingForWalletAddress[userId];
+    } catch (error) {
+      console.error("Error saving wallet address:", error);
+      ctx.reply("An error occurred while saving your wallet address.");
     }
   }
 };

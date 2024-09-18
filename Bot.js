@@ -117,7 +117,7 @@ bot.on("text", async (ctx) => {
     } else if (text === "Balance") {
       await balanceHandler.handleBalance(ctx);
     } else if (text === "Withdraw") {
-      await withdrawHandler.handleWithdraw(ctx);
+      await withdrawHandler.handleSetWallet(ctx);
     } else {
       await investHandler.handleText(ctx, text);
       await withdrawHandler.handleText(ctx, text);
