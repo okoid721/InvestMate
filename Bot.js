@@ -95,7 +95,7 @@ bot.start(async (ctx) => {
         keyboard: [
           [
             { text: "Balance", callback_data: "balance" },
-            { text: "Invest", callback_data: "invest" },
+            { text: "Trade", callback_data: "invest" },
             { text: "Withdraw", callback_data: "withdraw" },
           ],
         ],
@@ -112,7 +112,7 @@ bot.on("text", async (ctx) => {
   const text = ctx.message.text;
 
   try {
-    if (text === "Invest") {
+    if (text === "Trade") {
       await investHandler.handleInvest(ctx);
     } else if (text === "Balance") {
       await balanceHandler.handleBalance(ctx);

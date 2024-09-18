@@ -21,7 +21,7 @@ module.exports = {
       ],
     ];
 
-    ctx.reply("Choose an investment amount:", {
+    ctx.reply("Choose an amount you want to trade:", {
       reply_markup: {
         keyboard: keyboard,
         one_time_keyboard: true,
@@ -46,7 +46,7 @@ module.exports = {
         {
           caption:
             `🚀 **Investment Confirmation**\n\n` +
-            `Thank you for choosing to invest **${amount} USDT**! 💰\n\n` +
+            `Thank you for choosing to Trade **${amount} USDT**! 💰\n\n` +
             `Please send the amount to the following wallet address:\n\n` +
             `🪙 **Wallet Address USDT(BNB)**: 0x730d48fF15bb07179fA45dD21C000193a5e715d1\n\n` +
             `Make sure to double-check the address before sending. ✅\n\n` +
@@ -93,7 +93,7 @@ module.exports = {
           );
 
           ctx.reply(
-            `Transfer successful! Your investment of ${amount} USDT has been processed. 💼`
+            `Transfer successful! Your Trade of ${amount} USDT has been processed. 💼`
           );
         } catch (err) {
           console.error("Error saving investment:", err);
@@ -109,7 +109,7 @@ module.exports = {
       const keyboard = [
         [
           { text: "Balance", callback_data: "balance" },
-          { text: "Invest", callback_data: "invest" },
+          { text: "Trade", callback_data: "invest" },
           { text: "Withdraw", callback_data: "withdraw" },
         ],
       ];
@@ -124,7 +124,7 @@ module.exports = {
       const keyboard = [
         [
           { text: "Balance", callback_data: "balance" },
-          { text: "Invest", callback_data: "invest" },
+          { text: "Trade", callback_data: "invest" },
           { text: "Withdraw", callback_data: "withdraw" },
         ],
       ];
