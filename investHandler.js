@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { Markup } = require("telegraf");
 const { User, Investment } = require("./db"); // Import the Investment model
 
 // Temporary storage for pending investments (could also use session storage or a proper state management)
@@ -50,8 +51,17 @@ module.exports = {
             `Please send the amount to the following wallet address:\n\n` +
             `🪙 **Wallet Address USDT(BNB)**: 0x730d48fF15bb07179fA45dD21C000193a5e715d1\n\n` +
             `Make sure to double-check the address before sending. ✅\n\n` +
-            `Once you've sent the amount, please send your receipt to our support at [@InvestMate_01](https://t.me/InvestMate_01). 🧾\n\n` +
-            `After you've sent the receipt, click the button below to confirm your transfer. 🌟`,
+            `After you've sent the receipt, click the button below to share your transfer. 🌟`,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                Markup.button.url(
+                  "Send your receipt",
+                  "https://t.me/InvestMate_01"
+                ),
+              ],
+            ],
+          },
         }
       );
 
@@ -112,6 +122,7 @@ module.exports = {
           { text: "Trade", callback_data: "invest" },
           { text: "Set wallet", callback_data: "withdraw" },
         ],
+        [{ text: "Withdraw", callback_data: "show_withdraw_button" }],
       ];
       ctx.reply("What would you like to do next?", {
         reply_markup: {
@@ -127,6 +138,7 @@ module.exports = {
           { text: "Trade", callback_data: "invest" },
           { text: "Set wallet", callback_data: "withdraw" },
         ],
+        [{ text: "Withdraw", callback_data: "show_withdraw_button" }],
       ];
       ctx.reply("Action canceled.", {
         reply_markup: {
