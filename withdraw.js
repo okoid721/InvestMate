@@ -1,11 +1,10 @@
-const { User } = require("./db"); // Assuming User model is used to store wallet addresses
+const { User } = require("./db");
 const waitingForWalletAddress = {};
 
 module.exports.handleSetWallet = async (ctx) => {
   const userId = ctx.from.id;
 
   try {
-    // Retrieve user information from the database
     const user = await User.findOne({ userId });
 
     if (!user) {
@@ -13,7 +12,6 @@ module.exports.handleSetWallet = async (ctx) => {
       return;
     }
 
-    // Check if the user already has a wallet address set
     if (user.wallet) {
       ctx.reply(
         "Your wallet address has already been set and cannot be changed."
@@ -21,10 +19,9 @@ module.exports.handleSetWallet = async (ctx) => {
       return;
     }
 
-    // Prompt the user to submit their wallet address
     waitingForWalletAddress[userId] = true;
     ctx.reply(
-      "Please submit your USDT(BNB) wallet address and 20% of your balance will be withdrawed:"
+      "Please submit your USDT(BNB) wallet address and 20% of your balance will be sent to your wallet every 24hrs:"
     );
   } catch (error) {
     console.error("Error checking user wallet:", error);
@@ -36,10 +33,9 @@ module.exports.handleText = async (ctx, text) => {
   const userId = ctx.from.id;
 
   if (waitingForWalletAddress[userId] === true) {
-    const walletAddress = text; // Assuming text contains the wallet address
+    const walletAddress = text;
 
     try {
-      // Retrieve user information from the database
       const user = await User.findOne({ userId });
 
       if (!user) {
@@ -47,16 +43,18 @@ module.exports.handleText = async (ctx, text) => {
         return;
       }
 
-      // Save the wallet address if it's not already set
       if (!user.wallet) {
         user.wallet = walletAddress;
+        console.log("Saving wallet address:", walletAddress); // Log wallet address
+
         await user.save();
+        console.log("Wallet address saved:", user.wallet); // Log saved user object
+
         ctx.reply("Wallet uploaded successfully!");
       } else {
         ctx.reply("Your wallet address is already set and cannot be changed.");
       }
 
-      // Clear the waiting flag after wallet is set
       delete waitingForWalletAddress[userId];
     } catch (error) {
       console.error("Error saving wallet address:", error);

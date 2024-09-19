@@ -11,7 +11,9 @@ const userSchema = new mongoose.Schema({
   lastName: String,
   username: String,
   dateJoined: { type: Date, default: Date.now },
-  balance: { type: Number, default: 0 }, // Add balance field
+  balance: { type: Number, default: 0 },
+  wallet: { type: String, unique: true },
+  lastWithdrawalTime: { type: Date }, // Add this field to track the last withdrawal time
 });
 
 // Define a schema for storing investments

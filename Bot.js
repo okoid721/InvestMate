@@ -8,6 +8,7 @@ const { connectToDatabase, User, Investment, Withdrawal } = require("./db");
 const investHandler = require("./investHandler");
 const withdrawHandler = require("./withdraw");
 const balanceHandler = require("./balance");
+const { handleWithdraw, showWithdrawButton } = require("./withdrawal");
 
 // Initialize and connect to the database
 connectToDatabase();
@@ -96,8 +97,9 @@ bot.start(async (ctx) => {
           [
             { text: "Balance", callback_data: "balance" },
             { text: "Trade", callback_data: "invest" },
-            { text: "Withdraw", callback_data: "withdraw" },
+            { text: "Set wallet", callback_data: "withdraw" },
           ],
+          [{ text: "Withdraw", callback_data: "show_withdraw_button" }], // Withdraw button added here
         ],
         one_time_keyboard: true,
         resize_keyboard: true,
@@ -108,6 +110,7 @@ bot.start(async (ctx) => {
   }
 });
 
+// Handle text commands
 bot.on("text", async (ctx) => {
   const text = ctx.message.text;
 
@@ -116,8 +119,10 @@ bot.on("text", async (ctx) => {
       await investHandler.handleInvest(ctx);
     } else if (text === "Balance") {
       await balanceHandler.handleBalance(ctx);
-    } else if (text === "Withdraw") {
+    } else if (text === "Set wallet") {
       await withdrawHandler.handleSetWallet(ctx);
+    } else if (text === "Withdraw") {
+      await showWithdrawButton(ctx); // Show withdrawal button
     } else {
       await investHandler.handleText(ctx, text);
       await withdrawHandler.handleText(ctx, text);
@@ -125,6 +130,11 @@ bot.on("text", async (ctx) => {
   } catch (error) {
     console.error("Error handling text message:", error);
   }
+});
+
+// Handle withdrawal button click
+bot.action("withdraw", async (ctx) => {
+  await handleWithdraw(ctx); // Perform the withdrawal when the button is clicked
 });
 
 // Launch both Express and Telegraf

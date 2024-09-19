@@ -110,7 +110,7 @@ module.exports = {
         [
           { text: "Balance", callback_data: "balance" },
           { text: "Trade", callback_data: "invest" },
-          { text: "Withdraw", callback_data: "withdraw" },
+          { text: "Set wallet", callback_data: "withdraw" },
         ],
       ];
       ctx.reply("What would you like to do next?", {
@@ -125,7 +125,7 @@ module.exports = {
         [
           { text: "Balance", callback_data: "balance" },
           { text: "Trade", callback_data: "invest" },
-          { text: "Withdraw", callback_data: "withdraw" },
+          { text: "Set wallet", callback_data: "withdraw" },
         ],
       ];
       ctx.reply("Action canceled.", {
