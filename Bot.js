@@ -10,6 +10,7 @@ const investHandler = require("./investHandler");
 const withdrawHandler = require("./withdraw");
 const balanceHandler = require("./balance");
 const { handleWithdraw, showWithdrawButton } = require("./withdrawal");
+const { generateReferralLink, handleReferral } = require("./referral");
 
 // Initialize and connect to the database
 connectToDatabase();
@@ -52,19 +53,6 @@ app.get("/api/withdrawals", async (req, res) => {
   }
 });
 
-app.delete("/api/withdrawals/:id", async (req, res) => {
-  try {
-    const result = await Withdrawal.deleteOne({ _id: req.params.id });
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Withdrawal not found" });
-    }
-    res.status(200).json({ message: "Withdrawal deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting withdrawal:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
 // Initialize the Telegraf bot
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const bot = new Telegraf(BOT_TOKEN);
@@ -100,12 +88,16 @@ bot.start(async (ctx) => {
             { text: "Trade", callback_data: "invest" },
             { text: "Set wallet", callback_data: "withdraw" },
           ],
-          [{ text: "Withdraw", callback_data: "show_withdraw_button" }], // Withdraw button added here
+          [
+            { text: "Withdraw", callback_data: "show_withdraw_button" },
+            { text: "Referral", callback_data: "referral" },
+          ], // Withdraw button added here
         ],
         one_time_keyboard: true,
         resize_keyboard: true,
       },
     });
+    await handleReferral(ctx);
   } catch (error) {
     console.error("Error handling /start command:", error);
   }
@@ -114,7 +106,6 @@ bot.start(async (ctx) => {
 // Handle text commands
 bot.on("text", async (ctx) => {
   const text = ctx.message.text;
-
   try {
     if (text === "Trade") {
       await investHandler.handleInvest(ctx);
@@ -124,6 +115,8 @@ bot.on("text", async (ctx) => {
       await withdrawHandler.handleSetWallet(ctx);
     } else if (text === "Withdraw") {
       await showWithdrawButton(ctx); // Show withdrawal button
+    } else if (text === "Referral") {
+      await generateReferralLink(ctx);
     } else {
       await investHandler.handleText(ctx, text);
       await withdrawHandler.handleText(ctx, text);

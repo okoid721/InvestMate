@@ -5,7 +5,14 @@ module.exports.handleBalance = async (ctx) => {
     const user = await User.findOne({ userId: ctx.from.id });
 
     if (user) {
-      ctx.reply(`Your balance is ${user.balance.toFixed(5)} USDT`);
+      const totalBalance = user.balance + user.referralBalance;
+      ctx.reply(
+        `Your balance is ${totalBalance.toFixed(
+          5
+        )} USDT (Normal: ${user.balance.toFixed(
+          5
+        )} USDT, Referral: ${user.referralBalance.toFixed(5)} USDT)`
+      );
     } else {
       ctx.reply("User not found.");
     }

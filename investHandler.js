@@ -68,6 +68,7 @@ module.exports = {
       // Display the "Transfer successful" button immediately
       const keyboard = [
         [{ text: "Transfer successful", callback_data: "success" }],
+        [{ text: "Back", callback_data: "back" }],
       ];
 
       ctx.reply(
@@ -122,7 +123,10 @@ module.exports = {
           { text: "Trade", callback_data: "invest" },
           { text: "Set wallet", callback_data: "withdraw" },
         ],
-        [{ text: "Withdraw", callback_data: "show_withdraw_button" }],
+        [
+          { text: "Withdraw", callback_data: "show_withdraw_button" },
+          { text: "Referral", callback_data: "referral" },
+        ],
       ];
       ctx.reply("What would you like to do next?", {
         reply_markup: {
@@ -138,7 +142,10 @@ module.exports = {
           { text: "Trade", callback_data: "invest" },
           { text: "Set wallet", callback_data: "withdraw" },
         ],
-        [{ text: "Withdraw", callback_data: "show_withdraw_button" }],
+        [
+          { text: "Withdraw", callback_data: "show_withdraw_button" },
+          { text: "Referral", callback_data: "referral" },
+        ],
       ];
       ctx.reply("Action canceled.", {
         reply_markup: {

@@ -12,9 +12,13 @@ const userSchema = new mongoose.Schema({
   username: String,
   dateJoined: { type: Date, default: Date.now },
   balance: { type: Number, default: 0 },
-  wallet: { type: String, unique: true },
-  lastWithdrawalTime: { type: Date }, // Add this field to track the last withdrawal time
+  referralBalance: { type: Number, default: 0 }, // New field for referral balance
+  referralCode: { type: String, unique: true },
+  wallet: { type: String }, // Remove unique: true constraint
+  lastWithdrawalTime: { type: Date },
+  // Add this field to track the last withdrawal time
 });
+userSchema.index({ wallet: 1 }, { unique: false });
 
 // Define a schema for storing investments
 const investmentSchema = new mongoose.Schema({
@@ -38,6 +42,13 @@ const withdrawalSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Investment = mongoose.model("Investment", investmentSchema);
 const Withdrawal = mongoose.model("Withdrawal", withdrawalSchema);
+User.collection.dropIndex("wallet_1", (err) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log("Unique index on wallet field dropped");
+  }
+});
 
 async function connectToDatabase() {
   try {
